@@ -2,6 +2,11 @@
 
 namespace Codememory\Components\Database\Connectors\Drivers;
 
+use Codememory\Components\Database\Builders\AbstractBuilder;
+use Codememory\Components\Database\Builders\Compilers\AbstractCompiler;
+use Codememory\Components\Database\Builders\Compilers\SqliteCompiler;
+use Codememory\Components\Database\Builders\SqlServerBuilder;
+use JetBrains\PhpStorm\Pure;
 use LogicException;
 use PDO;
 
@@ -31,7 +36,7 @@ class SqliteDriver extends AbstractDriver
     public function getConnect(): PDO
     {
 
-        return new PDO($this->getCollectedDns());
+        return new PDO($this->getCollectedDns(), options: $this->options);
 
     }
 
@@ -42,6 +47,28 @@ class SqliteDriver extends AbstractDriver
     {
 
         return 'sqlite';
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Pure]
+    public function getSchemaCompiler(): AbstractCompiler
+    {
+
+        return new SqliteCompiler($this);
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Pure]
+    public function getBuilder(): AbstractBuilder
+    {
+
+        return new SqlServerBuilder($this->connection);
 
     }
 
@@ -84,9 +111,9 @@ class SqliteDriver extends AbstractDriver
         }
 
         return match (true) {
-            $this->tmp      => sprintf('%s:', $this->getDriverName()),
+            $this->tmp => sprintf('%s:', $this->getDriverName()),
             $this->toMemory => sprintf('%s:%s', $this->getDriverName(), ':memory:'),
-            default         => sprintf('%s:%s', $this->getDriverName(), $this->connectionData->getDbname()),
+            default => sprintf('%s:%s', $this->getDriverName(), $this->connection->getConnectionData()->getDbname()),
         };
 
     }

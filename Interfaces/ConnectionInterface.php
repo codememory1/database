@@ -2,10 +2,12 @@
 
 namespace Codememory\Components\Database\Interfaces;
 
-use Codememory\Components\Database\Connectors\Drivers\AbstractDriver;
+use Codememory\Components\Database\Builders\AbstractBuilder;
+use Codememory\Components\Database\Builders\Compilers\AbstractCompiler;
+use PDO;
 
 /**
- * interface ConnectionInterface
+ * Interface ConnectionInterface
  *
  * @package Codememory\Components\Database\Interfaces
  *
@@ -15,52 +17,55 @@ interface ConnectionInterface
 {
 
     /**
-     * @param string $namespaceDriver
-     *
-     * @return ConnectionInterface
+     * @return DriverInterface
      */
-    public function setDriver(string $namespaceDriver): ConnectionInterface;
+    public function getDriver(): DriverInterface;
 
     /**
-     * @param string $host
-     *
-     * @return ConnectionInterface
+     * @return PDO|null
      */
-    public function setHost(string $host): ConnectionInterface;
+    public function getConnected(): ?PDO;
 
     /**
-     * @param int $port
-     *
-     * @return ConnectionInterface
+     * @return void
      */
-    public function setPort(int $port): ConnectionInterface;
+    public function closeConnection(): void;
 
     /**
-     * @param string $dbname
-     *
-     * @return ConnectionInterface
+     * @return bool
      */
-    public function setDbname(string $dbname): ConnectionInterface;
+    public function isConnection(): bool;
 
     /**
-     * @param string $username
-     *
-     * @return ConnectionInterface
+     * @return bool
      */
-    public function setUsername(string $username): ConnectionInterface;
+    public function isFullConnection(): bool;
 
     /**
-     * @param string $password
-     *
-     * @return ConnectionInterface
+     * @return AbstractBuilder
      */
-    public function setPassword(string $password): ConnectionInterface;
+    public function getBuilder(): AbstractBuilder;
 
     /**
-     * @param string $charset
+     * @return AbstractCompiler
+     */
+    public function getSchemaCompiler(): AbstractCompiler;
+
+    /**
+     * @return ConnectionDataInterface
+     */
+    public function getConnectionData(): ConnectionDataInterface;
+
+    /**
+     * @param callable $callback
      *
      * @return ConnectionInterface
      */
-    public function setCharset(string $charset): ConnectionInterface;
+    public function reconnect(callable $callback): ConnectionInterface;
+
+    /**
+     * @return ConnectionInterface
+     */
+    public function cloneConnection(): ConnectionInterface;
 
 }

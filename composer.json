@@ -9,12 +9,15 @@
         }
     ],
     "require": {
+        "php": ">=8.0",
         "codememory/config": "^1.1",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "codememory/fs": "^1.1"
     },
     "autoload": {
         "psr-4": {
-            "Codememory\\Components\\Database\\": ""
+            "Codememory\\Components\\Database\\": "",
+            "App\\": "app/"
         }
     },
     "require-dev": {

@@ -2,12 +2,8 @@
 
 namespace Codememory\Components\Database\Connectors;
 
-use Codememory\Components\Database\Connectors\Drivers\AbstractDriver;
 use Codememory\Components\Database\Interfaces\ConnectionDataInterface;
 use Codememory\Components\Database\Interfaces\DriverInterface;
-use Codememory\Components\Database\Interfaces\DriverNotImplementedInterfaceException;
-use ReflectionClass;
-use ReflectionException;
 
 /**
  * Class ConnectionData
@@ -20,9 +16,9 @@ class ConnectionData implements ConnectionDataInterface
 {
 
     /**
-     * @var string
+     * @var DriverInterface
      */
-    private string $driver;
+    private DriverInterface $driver;
 
     /**
      * @var string|null
@@ -57,18 +53,18 @@ class ConnectionData implements ConnectionDataInterface
     /**
      * ConnectionData constructor.
      *
-     * @param string      $namespaceDriver
-     * @param string|null $host
-     * @param int|null    $port
-     * @param string|null $dbname
-     * @param string|null $username
-     * @param string|null $password
-     * @param string|null $charset
+     * @param DriverInterface $driver
+     * @param string|null     $host
+     * @param int|null        $port
+     * @param string|null     $dbname
+     * @param string|null     $username
+     * @param string|null     $password
+     * @param string|null     $charset
      */
-    public function __construct(string $namespaceDriver, ?string $host, ?int $port, ?string $dbname, ?string $username, ?string $password, ?string $charset)
+    public function __construct(DriverInterface $driver, ?string $host, ?int $port, ?string $dbname, ?string $username, ?string $password, ?string $charset)
     {
 
-        $this->driver = $namespaceDriver;
+        $this->driver = $driver;
         $this->host = $host;
         $this->port = $port;
         $this->dbname = $dbname;
@@ -80,19 +76,11 @@ class ConnectionData implements ConnectionDataInterface
 
     /**
      * @inheritDoc
-     * @throws DriverNotImplementedInterfaceException
-     * @throws ReflectionException
      */
-    public function getDriver(): AbstractDriver
+    public function getDriver(): DriverInterface
     {
 
-        $reflection = new ReflectionClass($this->driver);
-
-        if (false === $reflection->implementsInterface(DriverInterface::class)) {
-            throw new DriverNotImplementedInterfaceException($this->driver, DriverInterface::class);
-        }
-
-        return new $this->driver($this);
+        return $this->driver;
 
     }
 

@@ -1,16 +1,11 @@
 <?php
 
-ini_set('display_errors', 1);
-
-use Codememory\Components\Database\Builders\Compilers\Configs\TableConfig;
-use Codememory\Components\Database\Connectors\Connector;
 use Codememory\Components\Database\Connection;
+use Codememory\Components\Database\Connectors\Connector;
 use Codememory\Components\Database\Connectors\Drivers\MysqlDriver;
 use Codememory\Components\Database\Interfaces\ConnectionConfigurationInterface;
-use Codememory\Components\Database\ORM\EntityManager;
-use App\Entity\TestEntity;
-use Codememory\Components\Database\QueryBuilder\Expressions\Operators;
-use Codememory\Components\Database\QueryBuilder\QueryBuilder;
+use Symfony\Component\Console\Application;
+use Codememory\Components\Database\Commands\CreateDatabaseCommand;
 
 require_once 'vendor/autoload.php';
 
@@ -39,8 +34,8 @@ $connector
 
 $testConnection = new Connection($connector, 'test');
 
-$em = new EntityManager($testConnection);
+$app = new Application();
 
+$app->add(new CreateDatabaseCommand($testConnection));
 
-
-
+$app->run();

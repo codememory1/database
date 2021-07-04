@@ -2,9 +2,8 @@
 
 namespace Codememory\Components\Database\Connectors\Drivers;
 
-use Codememory\Components\Database\Interfaces\ConnectionDataInterface;
+use Codememory\Components\Database\Connection;
 use Codememory\Components\Database\Interfaces\DriverInterface;
-use PDO;
 
 /**
  * Class AbstractDriver
@@ -17,19 +16,41 @@ abstract class AbstractDriver implements DriverInterface
 {
 
     /**
-     * @var ConnectionDataInterface
+     * @var array
      */
-    protected ConnectionDataInterface $connectionData;
+    protected array $options = [];
 
     /**
-     * AbstractDriver constructor.
-     *
-     * @param ConnectionDataInterface $connectionData
+     * @var Connection|null
      */
-    public function __construct(ConnectionDataInterface $connectionData)
+    protected ?Connection $connection = null;
+
+    /**
+     * @param Connection $connection
+     *
+     * @return DriverInterface
+     */
+    public function setConnection(Connection $connection): DriverInterface
     {
 
-        $this->connectionData = $connectionData;
+        $this->connection = $connection;
+
+        return $this;
+
+    }
+
+    /**
+     * @param int $option
+     * @param int $value
+     *
+     * @return DriverInterface
+     */
+    public function addOption(int $option, int $value): DriverInterface
+    {
+
+        $this->options[$option] = $value;
+
+        return $this;
 
     }
 

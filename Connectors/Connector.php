@@ -2,15 +2,10 @@
 
 namespace Codememory\Components\Database\Connectors;
 
-use Codememory\Components\Database\Connectors\Drivers\MysqlDriver;
-use Codememory\Components\Database\Connectors\Drivers\PostgresDriver;
-use Codememory\Components\Database\Connectors\Drivers\SqliteDriver;
-use Codememory\Components\Database\Connectors\Drivers\SqlServerDriver;
 use Codememory\Components\Database\Exceptions\ConnectionNamedExist;
-use Codememory\Components\Database\Exceptions\ConnectionNotExistException;
-use Codememory\Components\Database\Exceptions\DriverNotAvailableException;
-use PDO;
-use PDOException;
+use Codememory\Components\Database\Interfaces\ConnectionConfigurationInterface;
+use Codememory\Components\Database\Interfaces\ConnectorInterface;
+use LogicException;
 
 /**
  * Class Connector
@@ -19,122 +14,37 @@ use PDOException;
  *
  * @author  Codememory
  */
-class Connector
+class Connector implements ConnectorInterface
 {
 
-    public const MYSQL_DRIVER = MysqlDriver::class;
-    public const SQLITE_DRIVER = SqliteDriver::class;
-    public const POSTGRES_DRIVER = PostgresDriver::class;
-    public const SQL_SERVER_DRIVER = SqlServerDriver::class;
-
     /**
-     * @var array
+     * @var ConnectionConfiguration[]
      */
     private array $connections = [];
 
     /**
-     * @var array
-     */
-    private array $connectionStates = [];
-
-    /**
-     * @var array
-     */
-    private array $connected = [];
-
-    /**
-     * @param string   $connectionName
-     * @param callable $callback
-     *
-     * @return $this
+     * @inheritDoc
      * @throws ConnectionNamedExist
      */
-    public function addConnection(string $connectionName, callable $callback): Connector
+    public function addConnection(string $connectionName, callable $callbackConfiguration): ConnectorInterface
     {
 
-        if (array_key_exists($connectionName, $this->connections)) {
+        if ($this->existConnection($connectionName)) {
             throw new ConnectionNamedExist($connectionName);
         }
 
-        $this->connections[$connectionName] = call_user_func($callback, new Connection());
+        $callCallbackConfiguration = call_user_func($callbackConfiguration, new ConnectionConfiguration());
+
+        $this->throwInvalidReturnCallbackConfiguration($callCallbackConfiguration);
+
+        $this->connections[$connectionName] = call_user_func($callbackConfiguration, new ConnectionConfiguration());
 
         return $this;
 
     }
 
     /**
-     * @param string $connectionName
-     *
-     * @return $this
-     * @throws ConnectionNotExistException
-     * @throws DriverNotAvailableException
-     */
-    public function makeConnection(string $connectionName): Connector
-    {
-
-        if (false === $this->existConnection($connectionName)) {
-            $this->throwAboutNotExistConnection($connectionName);
-        }
-
-        /** @var Connection $connection */
-        $connection = $this->connections[$connectionName];
-        $connectionData = $connection->getConnectionData();
-        $driver = $connectionData->getDriver();
-
-        if (!in_array($driver->getDriverName(), PDO::getAvailableDrivers())) {
-            throw new DriverNotAvailableException($driver->getDriverName());
-        }
-
-        try {
-            $pdo = $driver->getConnect();
-
-            $this->connected[$connectionName] = $pdo;
-            $this->connectionStates[$connectionName] = true;
-        } catch (PDOException) {
-            $this->connectionStates[$connectionName] = false;
-        }
-
-        return $this;
-
-    }
-
-    /**
-     * @param string $connectionName
-     *
-     * @return bool|null
-     */
-    public function isConnection(string $connectionName): ?bool
-    {
-
-        if (array_key_exists($connectionName, $this->connectionStates)) {
-            return $this->connectionStates[$connectionName];
-        }
-
-        return null;
-
-    }
-
-    /**
-     * @param string $connectionName
-     *
-     * @return PDO
-     * @throws ConnectionNotExistException
-     */
-    public function getConnection(string $connectionName): PDO
-    {
-
-        if (false === array_key_exists($connectionName, $this->connected)) {
-            $this->throwAboutNotExistConnection($connectionName);
-        }
-
-        return $this->connected[$connectionName];
-
-    }
-
-    /**
-     * @param string $connectionName
-     *
-     * @return bool
+     * @inheritDoc
      */
     public function existConnection(string $connectionName): bool
     {
@@ -144,14 +54,44 @@ class Connector
     }
 
     /**
-     * @param string $connectionName
-     *
-     * @throws ConnectionNotExistException
+     * @inheritDoc
      */
-    private function throwAboutNotExistConnection(string $connectionName): void
+    public function getConnections(): array
     {
 
-        throw new ConnectionNotExistException($connectionName);
+        return $this->connections;
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function changeConnectionConfiguration(string $connectionName, callable $callback): bool
+    {
+
+        if($this->existConnection($connectionName)) {
+            $callCallbackConfiguration = call_user_func($callback, $this->connections[$connectionName]);
+
+            $this->throwInvalidReturnCallbackConfiguration($callCallbackConfiguration);
+
+            $this->connections[$connectionName] = $callCallbackConfiguration;
+
+            return true;
+        }
+
+        return false;
+
+    }
+
+    /**
+     * @param mixed $callCallbackConfiguration
+     */
+    private function throwInvalidReturnCallbackConfiguration(mixed $callCallbackConfiguration): void
+    {
+
+        if (!$callCallbackConfiguration instanceof ConnectionConfigurationInterface) {
+            throw new LogicException(sprintf('Callback of addConnection method should return connection configuration(%s)', ConnectionConfigurationInterface::class));
+        }
 
     }
 

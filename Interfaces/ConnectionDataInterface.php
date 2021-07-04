@@ -2,8 +2,6 @@
 
 namespace Codememory\Components\Database\Interfaces;
 
-use Codememory\Components\Database\Connectors\Drivers\AbstractDriver;
-
 /**
  * Interface ConnectionDataInterface
  *
@@ -15,9 +13,9 @@ interface ConnectionDataInterface
 {
 
     /**
-     * @return AbstractDriver
+     * @return DriverInterface
      */
-    public function getDriver(): AbstractDriver;
+    public function getDriver(): DriverInterface;
 
     /**
      * @return string|null

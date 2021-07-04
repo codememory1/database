@@ -2,24 +2,25 @@
 
 namespace Codememory\Components\Database\Connectors;
 
+use Codememory\Components\Database\Interfaces\ConnectionConfigurationInterface;
 use Codememory\Components\Database\Interfaces\ConnectionDataInterface;
-use Codememory\Components\Database\Interfaces\ConnectionInterface;
+use Codememory\Components\Database\Interfaces\DriverInterface;
 use JetBrains\PhpStorm\Pure;
 
 /**
- * Class Connection
+ * Class ConnectionConfiguration
  *
  * @package Codememory\Components\Database\Connectors
  *
  * @author  Codememory
  */
-class Connection implements ConnectionInterface
+class ConnectionConfiguration implements ConnectionConfigurationInterface
 {
 
     /**
-     * @var ?string
+     * @var DriverInterface|null
      */
-    private ?string $driver = null;
+    private ?DriverInterface $driver = null;
 
     /**
      * @var string|null
@@ -54,10 +55,10 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setDriver(string $namespaceDriver): ConnectionInterface
+    public function setDriver(DriverInterface $driver): ConnectionConfigurationInterface
     {
 
-        $this->driver = $namespaceDriver;
+        $this->driver = $driver;
 
         return $this;
 
@@ -66,7 +67,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setHost(string $host): ConnectionInterface
+    public function setHost(string $host): ConnectionConfigurationInterface
     {
 
         $this->host = $host;
@@ -78,7 +79,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setPort(int $port): ConnectionInterface
+    public function setPort(int $port): ConnectionConfigurationInterface
     {
 
         $this->port = $port;
@@ -90,7 +91,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setDbname(string $dbname): ConnectionInterface
+    public function setDbname(?string $dbname): ConnectionConfigurationInterface
     {
 
         $this->dbname = $dbname;
@@ -102,7 +103,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setUsername(string $username): ConnectionInterface
+    public function setUsername(string $username): ConnectionConfigurationInterface
     {
 
         $this->username = $username;
@@ -114,7 +115,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setPassword(string $password): ConnectionInterface
+    public function setPassword(string $password): ConnectionConfigurationInterface
     {
 
         $this->password = $password;
@@ -126,7 +127,7 @@ class Connection implements ConnectionInterface
     /**
      * @inheritDoc
      */
-    public function setCharset(string $charset): ConnectionInterface
+    public function setCharset(string $charset): ConnectionConfigurationInterface
     {
 
         $this->charset = $charset;

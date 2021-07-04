@@ -2,6 +2,12 @@
 
 namespace Codememory\Components\Database\Connectors\Drivers;
 
+use Codememory\Components\Database\Builders\AbstractBuilder;
+use Codememory\Components\Database\Builders\Compilers\AbstractCompiler;
+use Codememory\Components\Database\Builders\Compilers\MysqlCompiler;
+use Codememory\Components\Database\Builders\MysqlBuilder;
+use Codememory\Components\Database\Interfaces\ConnectionDataInterface;
+use JetBrains\PhpStorm\Pure;
 use PDO;
 
 /**
@@ -20,7 +26,14 @@ class MysqlDriver extends AbstractDriver
     public function getConnect(): PDO
     {
 
-        return new PDO($this->getCollectedDns(), $this->connectionData->getUsername(), $this->connectionData->getPassword());
+        $connectionData = $this->connection->getConnectionData();
+
+        return new PDO(
+            $this->getCollectedDns($connectionData),
+            $connectionData->getUsername(),
+            $connectionData->getPassword(),
+            $this->options
+        );
 
     }
 
@@ -35,21 +48,44 @@ class MysqlDriver extends AbstractDriver
     }
 
     /**
+     * @inheritDoc
+     */
+    #[Pure]
+    public function getSchemaCompiler(): AbstractCompiler
+    {
+
+        return new MysqlCompiler($this);
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBuilder(): AbstractBuilder
+    {
+
+        return new MysqlBuilder($this->connection);
+
+    }
+
+    /**
+     * @param ConnectionDataInterface $connectionData
+     *
      * @return string
      */
-    private function getCollectedDns(): string
+    private function getCollectedDns(ConnectionDataInterface $connectionData): string
     {
 
         $dnsInString = null;
         $dnsInArray = [
-            'host'    => $this->connectionData->getHost(),
-            'port'    => $this->connectionData->getPort(),
-            'dbname'  => $this->connectionData->getDbname(),
-            'charset' => $this->connectionData->getCharset()
+            'host'    => $connectionData->getHost(),
+            'port'    => $connectionData->getPort(),
+            'dbname'  => $connectionData->getDbname(),
+            'charset' => $connectionData->getCharset()
         ];
 
         foreach ($dnsInArray as $key => $value) {
-            if (null === $value) {
+            if (empty($value)) {
                 continue;
             }
 
