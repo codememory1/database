@@ -4,9 +4,11 @@ namespace Codememory\Components\Database\QueryBuilder;
 
 use Codememory\Components\Database\Interfaces\ConnectionInterface;
 use Codememory\Components\Database\Interfaces\QueryDataDestinationInterface;
+use Codememory\Components\Database\ORM\EntityHelper;
 use Codememory\Components\Database\QueryBuilder\Expressions\Expression;
 use Codememory\Components\Database\QueryBuilder\Expressions\Join;
 use Codememory\Components\Database\QueryBuilder\Expressions\Union;
+use Codememory\Support\ConvertType;
 use Codememory\Support\Str;
 use JetBrains\PhpStorm\Pure;
 
@@ -41,6 +43,11 @@ abstract class AbstractBuilder implements QueryDataDestinationInterface
     protected Union $union;
 
     /**
+     * @var ConvertType
+     */
+    protected ConvertType $convertType;
+
+    /**
      * @var string|null
      */
     private ?string $queryType = null;
@@ -58,6 +65,7 @@ abstract class AbstractBuilder implements QueryDataDestinationInterface
         $this->expression = new Expression();
         $this->join = new Join();
         $this->union = new Union();
+        $this->convertType = new ConvertType();
 
     }
 

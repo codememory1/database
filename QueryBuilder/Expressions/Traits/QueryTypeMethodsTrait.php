@@ -53,7 +53,7 @@ trait QueryTypeMethodsTrait
         if ([] !== $queryDataDestination->getValues()) {
             foreach ($queryDataDestination->getValues() as $key => $value) {
                 $rowColumns .= sprintf('%s,', $this->shieldingColumnName($key));
-                $values .= sprintf('\'%s\',', $value);
+                $values .= sprintf('%s,', $this->shieldingValue($value));
             }
 
             $rowColumns = mb_substr($rowColumns, 0, -1);
@@ -62,7 +62,7 @@ trait QueryTypeMethodsTrait
 
         return $this->formatting(
             'INSERT INTO',
-            $this->shieldingColumnName($queryDataDestination->getTableName()),
+            $this->shieldingColumnName($queryDataDestination->getTable()['name']),
             sprintf('(%s)', $rowColumns),
             null !== $values ? sprintf('VALUES (%s)', $values) : null,
             $queryDataDestination->getSubQuery()
@@ -80,12 +80,12 @@ trait QueryTypeMethodsTrait
         $assignment = null;
 
         foreach ($queryDataDestination->getValues() as $key => $value) {
-            $assignment .= "{$this->shieldingColumnName($key)} = '$value',";
+            $assignment .= sprintf('%s = %s,', $this->shieldingColumnName($key), $this->shieldingValue($value));
         }
 
         return $this->formatting(
             'UPDATE',
-            $this->getSqlFormatTableName($queryDataDestination->getTable()),
+            $this->getSqlFormatTableName($queryDataDestination->getTable()['name']),
             $queryDataDestination->getSqlJoin(),
             'SET',
             mb_substr($assignment, 0, -1),
@@ -123,7 +123,7 @@ trait QueryTypeMethodsTrait
     private function getSqlFormatTableName(array $tableData): string
     {
 
-        if(null === $tableData['alias']) {
+        if (null === $tableData['alias']) {
             return $this->shieldingColumnName($tableData['name']);
         }
 

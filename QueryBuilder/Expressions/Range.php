@@ -57,7 +57,7 @@ final class Range
 
         $operator = $isNot ? 'NOT BETWEEN' : 'BETWEEN';
 
-        return sprintf('%s %s \'%s\' AND \'%s\'', $this->shieldingColumnName($column), $operator, $start, $end);
+        return sprintf('%s %s %s AND %s', $this->shieldingColumnName($column), $operator, $this->shieldingValue($start), $this->shieldingValue($end));
 
     }
 

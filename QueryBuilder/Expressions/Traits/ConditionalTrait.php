@@ -24,7 +24,7 @@ trait ConditionalTrait
     public function conditional(string $column, string $arithmeticOperator, int|float|string $value): string
     {
 
-        return "{$this->shieldingColumnName($column)} $arithmeticOperator '$value'";
+        return sprintf('%s %s %s', $this->shieldingColumnName($column), $arithmeticOperator, $this->shieldingValue($value));
 
     }
 

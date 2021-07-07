@@ -6,10 +6,17 @@ use Codememory\Components\Database\Exceptions\QueryTypeNotExistException;
 use Codememory\Components\Database\Interfaces\JoinSpecificationsInterface;
 use Codememory\Components\Database\Interfaces\QueryBuilderInterface;
 use Codememory\Components\Database\Interfaces\QueryDataDestinationInterface;
+use Codememory\Components\Database\ORM\EntityHelper;
 use Codememory\Components\Database\QueryBuilder\Expressions\Expression;
 use Codememory\Components\Database\QueryBuilder\Expressions\Traits\ShieldingTrait;
 use Codememory\Components\Database\QueryBuilder\Expressions\Union;
+use Codememory\Support\Arr;
 use Codememory\Support\Str;
+use Generator;
+use PDO;
+use PDOStatement;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class QueryBuilder
@@ -216,7 +223,7 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
         foreach ($columns as $index => $column) {
             $currentOrderIndex = Str::toUppercase($orderIndex[$index] ?? $orderIndex[array_key_last($orderIndex)]);
 
-            $this->order .=  sprintf('%s %s,', $this->shieldingColumnName($column), $currentOrderIndex);
+            $this->order .= sprintf('%s %s,', $this->shieldingColumnName($column), $currentOrderIndex);
         }
 
         $this->order = mb_substr($this->order, 0, -1);
@@ -253,7 +260,7 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
 
         $this->group = sprintf('GROUP BY %s', implode(',', $columns));
 
-        if($rollup) {
+        if ($rollup) {
             $this->group .= ' WITH ROLLUP';
         }
 
@@ -390,9 +397,9 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
     {
 
         $this->insert($tableOfWrite);
-        
+
         $this->subQuery = $queryBuilder->getQuery();
-        
+
         return $this;
 
     }
@@ -445,7 +452,7 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
 
         $this->table = $table;
 
-        if(null !== $alias) {
+        if (null !== $alias) {
             $this->table .= sprintf(' AS %s', $alias);
         }
 
@@ -463,7 +470,7 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
 
         $this->table = $table;
 
-        if(null !== $alias) {
+        if (null !== $alias) {
             $this->table .= sprintf(' AS %s', $alias);
         }
 
@@ -496,6 +503,81 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function setVariable(string $name, int|float|string $value): QueryBuilderInterface
+    {
+
+        $sql = sprintf('SET @%s = \'%s\'', $name, $value);
+
+        $this->connection->getConnected()
+            ->query($sql);
+
+        return $this;
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getVariable(string $name): mixed
+    {
+
+        $variable = $this->connection->getConnected()
+            ->query(sprintf('SELECT @%s', $name))
+            ->fetchAll(PDO::FETCH_COLUMN);
+
+        return [] !== $variable ? $this->convertType->auto($variable[0]) : false;
+
+    }
+
+    /**
+     * @inheritDoc
+     * @throws ReflectionException
+     */
+    public function getResult(object $entity): array
+    {
+
+        $entityHelper = new EntityHelper($entity);
+
+        Arr::map($this->parameters, function (mixed $key, mixed $value) {
+            return [':'.$key, $value];
+        });
+
+        $statement = $this->execute();
+
+        dd($statement->fetchAll(PDO::FETCH_ASSOC));
+
+    }
+
+    private function setColumnValues(ReflectionClass $reflector, object $entity, array $columns, array $values)
+    {
+
+        foreach ($columns as $index => $column) {
+            $propertyName = Str::camelCase($column);
+            $property = $reflector->getProperty($propertyName);
+
+            $property->setAccessible(true);
+            $property->setValue($entity, $values[$index]);
+        }
+
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function execute(): PDOStatement
+    {
+
+        $sth = $this->connection->getConnected()->prepare($this->getQuery());
+
+        $sth->execute($this->parameters);
+
+        return $sth;
+
+    }
+
+    /**
      * @param string       $reference
      * @param string|array $tables
      * @param string|array $aliases
@@ -510,6 +592,20 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
         $aliases = is_string($aliases) ? [$aliases] : $aliases;
 
         $this->sqlJoin .= $this->join->getAssembledJoin($reference, $tables, $aliases, empty($specification) ? '' : $specification);
+
+    }
+
+    /**
+     * @param array $records
+     *
+     * @return Generator
+     */
+    private function iterationRecords(array $records): Generator
+    {
+
+        foreach ($records as $record) {
+            yield $record;
+        }
 
     }
 

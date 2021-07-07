@@ -4,6 +4,7 @@ namespace Codememory\Components\Database\Interfaces;
 
 use Codememory\Components\Database\QueryBuilder\Expressions\Expression;
 use Codememory\Components\Database\QueryBuilder\Expressions\Union;
+use PDOStatement;
 
 /**
  * Interface QueryBuilderInterface
@@ -210,5 +211,32 @@ interface QueryBuilderInterface
      * @return QueryBuilderInterface
      */
     public function union(string ...$selects): QueryBuilderInterface;
+
+    /**
+     * @param string           $name
+     * @param int|float|string $value
+     *
+     * @return QueryBuilderInterface
+     */
+    public function setVariable(string $name, int|float|string $value): QueryBuilderInterface;
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getVariable(string $name): mixed;
+
+    /**
+     * @param object $entity
+     *
+     * @return array
+     */
+    public function getResult(object $entity): array;
+
+    /**
+     * @return PDOStatement
+     */
+    public function execute(): PDOStatement;
 
 }

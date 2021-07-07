@@ -24,7 +24,23 @@ trait ShieldingTrait
             return $columnName;
         }
 
-        return "`$columnName`";
+        return sprintf('`%s`', $columnName);
+
+    }
+
+    /**
+     * @param string|float|int|null $value
+     *
+     * @return string|int|float|null
+     */
+    public function shieldingValue(null|string|float|int $value): string|int|null|float
+    {
+
+        if(preg_match('/^:/', $value) || preg_match('/[.]+/', $value)) {
+            return $value;
+        }
+
+        return sprintf('\'%s\'', $value);
 
     }
 

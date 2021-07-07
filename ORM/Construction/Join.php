@@ -15,7 +15,16 @@ use Attribute;
 final class Join
 {
 
-    public function __construct()
+    /**
+     * Join constructor.
+     *
+     * @param string $entity
+     * @param array  $columns
+     */
+    public function __construct(
+        private string $entity,
+        private array $columns
+    )
     {
     }
 

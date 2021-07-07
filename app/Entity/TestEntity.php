@@ -31,8 +31,17 @@ class TestEntity
     #[ORM\DefaultValue(defaultValue: 'Danil')]
     private ?string $name = null;
 
+    /**
+     * @var string|null
+     */
     #[ORM\Column(name: 'text', type: 'text', nullable: false)]
     private ?string $text = null;
+
+    /**
+     * @var Test2Entity|null
+     */
+    #[ORM\Join(entity: Test2Entity::class, columns: ['col1', 'col2'])]
+    private ?Test2Entity $test2 = null;
 
     /**
      * @return int|null
