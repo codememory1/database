@@ -28,9 +28,16 @@ class TestRepository extends AbstractEntityRepository
         return $qb
             ->select(['t2.*', 't.*', 't2id' => 't2.id'])
             ->from('test', 't')
-            ->innerJoin(['test2'], ['t2'])
+            ->innerJoin(['test2'], ['t2'],
+                $qb->joinSpecification()->on(
+                    $qb->expression()->exprAnd(
+                        $qb->expression()->conditional('t.id', '=', 't2.id')
+                    )
+                )
+            )
             ->generateQuery()
-            ->getResult($this->entity);
+            ->getResult($this->entity)
+            ->toObject();
 
     }
 

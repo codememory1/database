@@ -48,6 +48,11 @@ abstract class AbstractBuilder implements QueryDataDestinationInterface
     protected ConvertType $convertType;
 
     /**
+     * @var Query
+     */
+    protected Query $queryExecutor;
+
+    /**
      * @var string|null
      */
     private ?string $queryType = null;
@@ -66,6 +71,7 @@ abstract class AbstractBuilder implements QueryDataDestinationInterface
         $this->join = new Join();
         $this->union = new Union();
         $this->convertType = new ConvertType();
+        $this->queryExecutor = new Query($this->connection);
 
     }
 

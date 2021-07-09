@@ -4,6 +4,7 @@ namespace Codememory\Components\Database\Interfaces;
 
 use Codememory\Components\Database\QueryBuilder\Expressions\Expression;
 use Codememory\Components\Database\QueryBuilder\Expressions\Union;
+use Codememory\Components\Database\QueryBuilder\Query;
 use PDOStatement;
 
 /**
@@ -230,9 +231,9 @@ interface QueryBuilderInterface
     /**
      * @param object $entity
      *
-     * @return array
+     * @return Query
      */
-    public function getResult(object $entity): array;
+    public function getResult(object $entity): Query;
 
     /**
      * @return PDOStatement

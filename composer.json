@@ -10,8 +10,9 @@
     ],
     "require": {
         "php": ">=8.0",
-        "codememory/config": "^1.1",
         "ext-pdo": "*",
+        "codememory/attributes": "^1.0",
+        "codememory/config": "^1.1",
         "codememory/fs": "^1.1"
     },
     "autoload": {
@@ -22,5 +23,8 @@
     },
     "require-dev": {
         "symfony/var-dumper": "^5.3"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

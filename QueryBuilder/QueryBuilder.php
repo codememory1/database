@@ -6,11 +6,9 @@ use Codememory\Components\Database\Exceptions\QueryTypeNotExistException;
 use Codememory\Components\Database\Interfaces\JoinSpecificationsInterface;
 use Codememory\Components\Database\Interfaces\QueryBuilderInterface;
 use Codememory\Components\Database\Interfaces\QueryDataDestinationInterface;
-use Codememory\Components\Database\ORM\EntityHelper;
 use Codememory\Components\Database\QueryBuilder\Expressions\Expression;
 use Codememory\Components\Database\QueryBuilder\Expressions\Traits\ShieldingTrait;
 use Codememory\Components\Database\QueryBuilder\Expressions\Union;
-use Codememory\Support\Arr;
 use Codememory\Support\Str;
 use Generator;
 use PDO;
@@ -535,21 +533,24 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
      * @inheritDoc
      * @throws ReflectionException
      */
-    public function getResult(object $entity): array
+    public function getResult(object $entity): Query
     {
 
-        $entityHelper = new EntityHelper($entity);
-
-        Arr::map($this->parameters, function (mixed $key, mixed $value) {
-            return [':'.$key, $value];
-        });
-
-        $statement = $this->execute();
-
-        dd($statement->fetchAll(PDO::FETCH_ASSOC));
+        return $this->queryExecutor
+            ->setEntity($entity)
+            ->setParameters($this->parameters)
+            ->setQuery($this->getQuery());
 
     }
 
+    /**
+     * @param ReflectionClass $reflector
+     * @param object          $entity
+     * @param array           $columns
+     * @param array           $values
+     *
+     * @throws ReflectionException
+     */
     private function setColumnValues(ReflectionClass $reflector, object $entity, array $columns, array $values)
     {
 
@@ -569,11 +570,10 @@ class QueryBuilder extends AbstractBuilder implements QueryBuilderInterface
     public function execute(): PDOStatement
     {
 
-        $sth = $this->connection->getConnected()->prepare($this->getQuery());
-
-        $sth->execute($this->parameters);
-
-        return $sth;
+        return $this->queryExecutor
+            ->setQuery($this->getQuery())
+            ->setParameters($this->parameters)
+            ->execute();
 
     }
 

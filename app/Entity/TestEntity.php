@@ -40,7 +40,7 @@ class TestEntity
     /**
      * @var Test2Entity|null
      */
-    #[ORM\Join(entity: Test2Entity::class, columns: ['col1', 'col2'])]
+    #[ORM\Join(entity: Test2Entity::class, columns: ['col1', 'col2', 't2id'])]
     private ?Test2Entity $test2 = null;
 
     /**

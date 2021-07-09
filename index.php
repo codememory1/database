@@ -51,7 +51,6 @@ $query = new QueryBuilder($testConnection);
 $testRepository = $em->getRepository(new TestEntity());
 
 dd($testRepository->tests());
-
 //$in = new Inspector(new TestEntity());
 //
 //dd($in->strictColumnExist('id'));
