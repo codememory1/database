@@ -151,7 +151,11 @@ class Query
                         $data[$recordIndex][$property->getName()][$columnName] = $record[$columnName];
                     }
 
-                    $data[$recordIndex] += array_diff_key($record, array_flip($joinArguments['columns']));
+                    if(array_key_exists($recordIndex, $data)) {
+                        $data[$recordIndex] += array_diff_key($record, array_flip($joinArguments['columns']));
+                    } else {
+                        array_push($data, array_diff_key($record, array_flip($joinArguments['columns'])));
+                    }
                 }
             }
         }
@@ -172,7 +176,7 @@ class Query
         $propertyTarget = new PropertyTarget($attributeAssistant);
         $records = $this->toArray();
 
-        foreach ($records as &$record) {
+        foreach ($this->iterationRecords($records) as &$record) {
             foreach ($record as $columnName => &$recordValue) {
                 if (is_array($recordValue)) {
                     $attributes = $propertyTarget->getAttributesByPropertyName($columnName);
@@ -185,7 +189,7 @@ class Query
 
         unset($record);
 
-        foreach ($records as $record) {
+        foreach ($this->iterationRecords($records) as $record) {
             $data[] = $this->setValueToProperty(clone $this->entity, $record);
         }
 
@@ -220,10 +224,10 @@ class Query
      *
      * @return Generator
      */
-    private function iterationRecords(array $records): Generator
+    private function &iterationRecords(array &$records): Generator
     {
 
-        foreach ($records as $record) {
+        foreach ($records as &$record) {
             yield $record;
         }
 

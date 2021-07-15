@@ -1,0 +1,12 @@
+database:
+  configName: database
+caching:
+  fileConfig: configs/caching
+configuration:
+  pathWithConfigs: configs
+  useCache: false
+environment:
+  pathWithFile: null
+  filename: .env
+  defaultAppMode: dev
+  useCache: false

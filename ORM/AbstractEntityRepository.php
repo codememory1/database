@@ -52,7 +52,8 @@ abstract class AbstractEntityRepository
             ->select()
             ->from($this->getEntityTableName())
             ->generateQuery()
-            ->getResult($this->entity);
+            ->getResult($this->entity)
+            ->toObject();
 
     }
 
@@ -79,7 +80,8 @@ abstract class AbstractEntityRepository
                 $qb->expression()->exprAnd(...$conditionals)
             )
             ->generateQuery()
-            ->getResult($this->entity);
+            ->getResult($this->entity)
+            ->toObject();
 
     }
 
